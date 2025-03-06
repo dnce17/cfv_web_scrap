@@ -1,5 +1,3 @@
-from bs4 import BeautifulSoup
-import requests
 import re
 
 from scrap_funcs import get_soup, get_hrefs, DESIRED_CARD_INFO
@@ -27,7 +25,7 @@ hrefs = get_hrefs(t_rows)
 all_cards = []
 # Cycle through EACH card"s page for info
 for i, href in enumerate(hrefs):
-  print(i)
+  # print(i)
   soup = get_soup(base_url + href)
 
   # Get card info, excluding effect
@@ -64,38 +62,43 @@ for i, href in enumerate(hrefs):
           # Remove non-letter characters (e.g., "!!") from skill
           skill = re.sub(r"[^a-zA-Z\s]", "", skill)
 
-          print(f"grade: {grade}")
-          print(f"skill: {skill}")
-
-          # card_dict["grade"] = grade
-          # card_dict["skill"] = skill
+          # print(f"skill: {skill}")
+          card_dict["skill"] = skill
         else:
-          grade = int(t_data_info.split()[1])  # Just take the grade number, no skill
-          print(f"grade: {grade}")
+          grade = int(t_data_info.split()[1])  # Order card do not have skills
         
+        # print(f"grade: {grade}")
+        card_dict["grade"] = grade
+
         requireCleaning = True
       
       # Handle "trigger effect" split
       if "trigger" in t_data_header:
         triggerType = t_data_info.split("/")[0].strip()
         triggerEffect = int(t_data_info.split("+")[-1].strip())
-        
+        card_dict["triggerType"] = triggerType
+        card_dict["triggerEffect"] = triggerEffect
+
         requireCleaning = True
         
-        print(f"trigger type: {triggerType}")
-        print(f"trigger effect: {triggerEffect}")
+        # print(f"trigger type: {triggerType}")
+        # print(f"trigger effect: {triggerEffect}")
+      
+      # Handle "card type" key name
+      if "card type" in t_data_header:
+        card_dict["cardType"] = t_data_info
+        requireCleaning = True
 
       if requireCleaning == False:
-        print(f"{t_data_header}: {t_data_info}")
-
-
-      # card_dict[t_data_header] = t_data_info
-
+        card_dict[t_data_header] = t_data_info
+        # print(f"{t_data_header}: {t_data_info}")
   
-  # all_cards.append(card_dict)
+  all_cards.append(card_dict)
   
   # if i == 4:
   #   break
 
-# for card in all_cards:
-#   print(card)
+for i, card in enumerate(all_cards):
+  print(i)
+  for info in card:
+    print(f"{info}: {card[info]}")
